@@ -1,0 +1,11 @@
+
+boto3
+pinecone-client
+langchain
+fastapi
+mangum
+PyPDF2
+pytesseract
+Pillow
+pandas
+
