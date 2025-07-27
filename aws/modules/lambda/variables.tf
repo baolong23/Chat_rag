@@ -7,7 +7,7 @@ variable "lambda_image_uri" {
 variable "image_tag" {
   type        = string
   description = "Tag của Docker image (commit SHA hoặc 'stub')."
-  default     = "latest"
+  default     = "0.0.4"
 }
 
 

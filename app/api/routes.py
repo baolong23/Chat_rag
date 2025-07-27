@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from rag.pipeline import RAGPipeline
 import os
 from typing import Optional
+import boto3
 
 router = APIRouter()
 
@@ -19,10 +20,15 @@ def get_pipeline():
     Dependency injector for RAGPipeline.
     """
     pinecone_api_key = os.environ.get('PINECONE_API_KEY')
-    pinecone_env = os.environ.get('PINECONE_ENV')
-    if not pinecone_api_key or not pinecone_env:
+    # pinecone_env = os.environ.get('PINECONE_ENV')
+    if not pinecone_api_key:
         raise HTTPException(status_code=500, detail="Pinecone configuration missing")
-    return RAGPipeline(pinecone_api_key, pinecone_env)
+    return RAGPipeline(pinecone_api_key)
+
+@router.get("/")
+async def start():
+    return {"status": "connected"}
+
 
 @router.post("/ingest")
 async def ingest(file: UploadFile = File(...)):
@@ -34,7 +40,6 @@ async def ingest(file: UploadFile = File(...)):
     if not file.filename:
         raise HTTPException(status_code=400, detail="No filename provided")
     try:
-        import boto3
         s3 = boto3.client('s3')
         s3_key = f"uploads/{file.filename}"
         s3.upload_fileobj(file.file, bucket_name, s3_key)

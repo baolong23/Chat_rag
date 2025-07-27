@@ -3,7 +3,10 @@ DocumentLoaderFactory and individual loaders for supported file types.
 """
 import os
 from fastapi import HTTPException
-
+from PyPDF2 import PdfReader
+import pytesseract
+from PIL import Image
+import pandas as pd
 
 class DocumentLoaderFactory:
     """
@@ -29,7 +32,6 @@ class PDFLoader:
     """
     @staticmethod
     def load(path: str) -> str:
-        from PyPDF2 import PdfReader
         reader = PdfReader(path)
         return "\n".join(page.extract_text() for page in reader.pages)
 
@@ -40,8 +42,6 @@ class PNGLoader:
     """
     @staticmethod
     def load(path: str) -> str:
-        import pytesseract
-        from PIL import Image
         return pytesseract.image_to_string(Image.open(path))
 
 
@@ -51,7 +51,6 @@ class CSVLoader:
     """
     @staticmethod
     def load(path: str) -> str:
-        import pandas as pd
         df = pd.read_csv(path)
         return df.to_string()
 

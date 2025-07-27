@@ -9,7 +9,7 @@ class RAGPipeline:
     """
     Facade for RAGService, provides ingest and query methods for API and workers.
     """
-    def __init__(self, pinecone_api_key: str, pinecone_env: str, index_name: str = "rag-index"):
+    def __init__(self, pinecone_api_key: str, pinecone_env: str = "", index_name: str = "rag-index"):
         self.rag_service = RAGService(pinecone_api_key, pinecone_env, index_name)
 
     def ingest_document(self, file) -> dict:

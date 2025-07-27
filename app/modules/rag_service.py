@@ -3,32 +3,32 @@ import tempfile
 from fastapi import UploadFile, HTTPException
 from pinecone import Pinecone
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.embeddings import OpenAIEmbeddings
-from langchain.llms import OpenAI
+from langchain_google_genai import GoogleGenerativeAIEmbeddings,ChatGoogleGenerativeAI
+# from langchain.llms import Gemini
 from rag.loaders import DocumentLoaderFactory
+import boto3
 
-
+google_apikey = os.environ.get("GOOGLE_API_KEY")
 
 class RAGService:
     """
     Facade for RAG operations: ingest, process, query.
     Handles document ingestion, embedding, and query answering using Langchain and Pinecone.
     """
-    def __init__(self, pinecone_api_key: str, pinecone_env: str, index_name: str = "rag-index"):
+    def __init__(self, pinecone_api_key: str, pinecone_env: str ="", index_name: str = "rag-index"):
         """
         Initialize RAGService with Pinecone and Langchain components.
         """
-        self.pinecone = Pinecone(api_key=pinecone_api_key, environment=pinecone_env)
+        self.pinecone = Pinecone(api_key=pinecone_api_key)
         self.index = self.pinecone.Index(index_name)
-        self.embedder = OpenAIEmbeddings()
-        self.llm = OpenAI()
+        self.embedder = GoogleGenerativeAIEmbeddings(model_name = "models/embedding-001")
+        self.llm = ChatGoogleGenerativeAI(api_key = google_apikey)
         self.text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
 
     def process_document_from_s3(self, bucket: str, key: str, filename: str) -> dict:
         """
         Download document from S3 and process for embedding and indexing.
         """
-        import boto3
         s3 = boto3.client('s3')
         ext = os.path.splitext(filename)[1].lower()
         with tempfile.NamedTemporaryFile(delete=False) as tmp:
