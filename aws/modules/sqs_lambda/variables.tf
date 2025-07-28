@@ -9,29 +9,12 @@ variable "image_tag" {
   default     = "0.0.1"
 }
 
-variable "sqs_arn" {
-  type = string
-  description = "SQS ARN from infra module"
-  default = "arn:aws:sqs:us-east-1:603022906913:rag-queue"
-}
+variable "sqs_arn" {}
 
-variable "sqs_id" {
-  type = string
-  description = "SQS ID from infra module"
-  default = "https://sqs.us-east-1.amazonaws.com/603022906913/rag-queue"
-}
-variable "ecr_url" {
-    type = string
-    default = "603022906913.dkr.ecr.us-east-1.amazonaws.com/sqs-worker-lambda"
-}
-variable "bucket_name" {
-    default = "rag-documents-bucket-0316e4ec"
-}
-variable "s3_arn" {
-    default = "arn:aws:s3:::rag-documents-bucket-0316e4ec"
-}
-
-
+variable "sqs_id" {}
+variable "ecr_url" {}
+variable "bucket_name" {}
+variable "s3_arn" {}
 
 
 variable "pinecone_api_key" {

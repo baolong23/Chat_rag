@@ -58,14 +58,30 @@ class RAGService:
         vectors = [(f"{filename}-{i}", emb, {"text": chunk}) for i, (chunk, emb) in enumerate(zip(chunks, embeddings))]
         self.index.upsert(vectors)
         return {"status": "document ingested", "chunks": len(chunks)}
+    
+    def get_document(self) -> list:
+        # Describe the index stats to get namespace information
+        stats = self.index.describe_index_stats()
 
-    def answer_query(self,embedder, llm, query: str, top_k: int = 3) -> dict:
+        # Access the namespaces from the stats object
+        namespaces = stats.namespaces
+        namespaces_ls =[]
+        # Print the namespaces and their vector counts
+        for namespace_name, namespace_stats in namespaces.items():
+            namespaces_ls.append(namespace_name)
+        return namespaces_ls
+        
+
+
+    def answer_query(self,embedder, llm, query: str, top_k: int = 3, namespace: str = "") -> dict:
         """
         Answer user query using indexed document context and LLM.
         """
         query_embedding = embedder.embed_query(query)
-        results = self.index.query(vector=query_embedding, top_k=top_k, include_metadata=True)
+        results = self.index.query(namespace=namespace, vector=query_embedding, top_k=top_k, include_metadata=True)
+        
         context = "\n".join([match["metadata"]["text"] for match in results["matches"]])
         prompt = f"Context:\n{context}\n\nQuestion: {query}\nAnswer:"
         answer = llm.invoke(prompt)
         return {"answer": answer, "context": context}
+    

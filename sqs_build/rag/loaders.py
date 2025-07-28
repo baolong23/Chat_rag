@@ -3,7 +3,7 @@ DocumentLoaderFactory and individual loaders for supported file types.
 """
 import os
 from fastapi import HTTPException
-from PyPDF2 import PdfReader
+from pypdf import PdfReader
 import pytesseract
 from PIL import Image
 import pandas as pd

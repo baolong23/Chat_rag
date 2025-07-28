@@ -1,0 +1,1 @@
+{"Modules":[{"Key":"","Source":"","Dir":"."},{"Key":"infra","Source":"./modules/infra","Dir":"modules/infra"},{"Key":"infra.infra","Source":"./modules/infra","Dir":""},{"Key":"lambda","Source":"./modules/lambda","Dir":"modules/lambda"},{"Key":"sqs_lambda","Source":"./modules/sqs_lambda","Dir":"modules/sqs_lambda"}]}

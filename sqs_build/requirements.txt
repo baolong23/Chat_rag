@@ -5,6 +5,7 @@ langchain
 fastapi
 mangum
 PyPDF2
+pypdf
 pytesseract
 Pillow
 pandas

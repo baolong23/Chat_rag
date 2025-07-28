@@ -11,16 +11,18 @@ variable "image_tag" {
 }
 
 
+
+
 variable "pinecone_api_key" {
   description = "Pinecone API Key"
   type        = string
-  default = "pcsk_3Tx7pD_4SftcLZWEjjZEoUiLnUw1vDFVXWHMndLuMh6WXrpbT12JL8MNfCA3u71dxxiqfw"
+  default = "[PUT PINECONE API KEY HERE]"
 }
 
 variable "google_api_key" {
   description = "Google API Key"
   type        = string
-  default = "AIzaSyCsekfaCCMGPbRTicrqz8ylRT1aEOf-mzc"
+  default = "[PUT GOOGLE API KEY HERE]"
 }
 
 variable "pinecone_env" {

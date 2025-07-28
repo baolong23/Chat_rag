@@ -13,4 +13,5 @@ langchain-community
 # uvicorn[standard]
 python-multipart
 numpy>=1.22,<2.1
+python-magic
   

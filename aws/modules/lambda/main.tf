@@ -7,6 +7,12 @@ provider "aws" {
 resource "aws_api_gateway_rest_api" "rag_api" {
   name        = "rag-service-api"
   description = "API Gateway for RAG question answering service"
+  
+  binary_media_types = [
+    "image/png",
+    "application/pdf",
+    "application/octet-stream"
+  ]
 }
 
 resource "aws_api_gateway_resource" "query" {
@@ -30,6 +36,7 @@ resource "aws_api_gateway_integration" "rag_service_integration" {
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   uri                     = "${aws_lambda_function.rag_service.invoke_arn}"
+  content_handling = "CONVERT_TO_BINARY"
 }
 
 
@@ -65,6 +72,7 @@ resource "aws_lambda_function" "rag_service" {
   package_type  = "Image"
   image_uri     =  "${var.ecr_url}:${var.image_tag}"#var.lambda_image_uri # Set this variable in your terraform.tfvars or pipeline
   timeout       = 120
+  memory_size   = 1024
   environment {
     variables = {
       PINECONE_API_KEY = var.pinecone_api_key

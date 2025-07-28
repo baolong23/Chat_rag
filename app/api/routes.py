@@ -4,7 +4,9 @@ from pydantic import BaseModel
 from rag.pipeline import RAGPipeline
 import os
 from typing import Optional
-import boto3
+from PyPDF2 import PdfReader
+from tempfile import NamedTemporaryFile
+
 
 from langchain_google_genai import GoogleGenerativeAIEmbeddings,ChatGoogleGenerativeAI
 
@@ -16,6 +18,7 @@ class QueryRequest(BaseModel):
     """
     query: str
     top_k: Optional[int] = 3
+    name_space: str
 
 def get_pipeline():
     """
@@ -43,11 +46,21 @@ async def ingest(file: UploadFile = File(...)):
     if not file.filename:
         raise HTTPException(status_code=400, detail="No filename provided")
     try:
+        import boto3
+        from io import BytesIO
         s3 = boto3.client('s3')
-        print(s3)
         s3_key = f"uploads/{file.filename}"
-        print(s3_key)
-        s3.upload_fileobj(file.file, bucket_name, s3_key)
+      
+        # ✅ QUAN TRỌNG: Đọc file theo chunks để tránh memory issues trong Lambda
+     
+        content = await file.read()  # Chỉ đọc 1 lần
+
+        s3.upload_fileobj(
+            BytesIO(content),
+            bucket_name,
+            s3_key,
+            ExtraArgs={'ContentType': file.content_type}
+        )
         # Send SQS message for worker to process
         if not sqs_queue_url:
             raise HTTPException(status_code=500, detail="SQS queue URL not configured")
@@ -61,7 +74,16 @@ async def ingest(file: UploadFile = File(...)):
         sqs.send_message(QueueUrl=sqs_queue_url, MessageBody=json.dumps(msg_body))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"S3/SQS operation failed: {str(e)}")
+    finally:
+        file.file.close()
     return {"status": "uploaded to S3 and queued for processing", "s3_key": s3_key}
+
+@router.get("/file")
+async def getFile(pipeline: RAGPipeline = Depends(get_pipeline)):
+    try:
+        return pipeline.get_document()
+    except Exception as e:
+        print(f"Get list file failed: {e}")
 
 @router.post("/query")
 async def query(request: QueryRequest, pipeline: RAGPipeline = Depends(get_pipeline)):
@@ -73,7 +95,9 @@ async def query(request: QueryRequest, pipeline: RAGPipeline = Depends(get_pipel
         llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", api_key=google_apikey)
         if not request.query:
             raise HTTPException(status_code=400, detail="Query string required")
-        return pipeline.answer_query(embedder,llm,request.query, request.top_k or 3)
+        return pipeline.answer_query(embedder,llm,request.query, request.top_k or 3,request.name_space)
     except Exception as e:
         print(f"[ERROR] Query failed: {e}")
         raise HTTPException(status_code=500, detail=f"{str(e)}")
+    
+

@@ -4,6 +4,7 @@ from fastapi import UploadFile, HTTPException
 from pinecone import Pinecone
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_google_genai import GoogleGenerativeAIEmbeddings,ChatGoogleGenerativeAI
+
 # from langchain.llms import Gemini
 from rag.loaders import DocumentLoaderFactory
 import boto3
@@ -30,7 +31,7 @@ class RAGService:
         """
         s3 = boto3.client('s3')
         ext = os.path.splitext(filename)[1].lower()
-        with tempfile.NamedTemporaryFile(delete=False) as tmp:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=ext) as tmp:
             s3.download_fileobj(bucket, key, tmp)
             tmp_path = tmp.name
             print(f"Downloaded {filename} to temporary path: {tmp_path}")
@@ -41,10 +42,10 @@ class RAGService:
         Ingest document uploaded via FastAPI endpoint.
         """
         ext = os.path.splitext(file.filename)[1].lower()
-        with tempfile.NamedTemporaryFile(delete=False) as tmp:
+        with tempfile.NamedTemporaryFile(delete=False,  suffix=ext) as tmp:
             tmp.write(file.file.read())
             tmp_path = tmp.name
-        return self._process_and_index(tmp_path, file.filename, ext)
+        return self._process_and_index(f"${tmp_path}.ext", file.filename, ext)
 
     def _process_and_index(self, path: str, filename: str, ext: str) -> dict:
         """
@@ -53,6 +54,15 @@ class RAGService:
         text = DocumentLoaderFactory.load(path, ext)
         chunks = self.text_splitter.split_text(text)
         embeddings = self.embedder.embed_documents(chunks)
-        vectors = [(f"{filename}-{i}", emb, {"text": chunk}) for i, (chunk, emb) in enumerate(zip(chunks, embeddings))]
-        self.index.upsert(vectors)
+        vectors = [
+            {
+                "id": f"{filename}-{i}",
+                "values": emb,
+                "metadata": {"text": chunk}
+            }
+            for i, (chunk, emb) in enumerate(zip(chunks, embeddings))
+        ]
+
+        self.index.upsert(vectors=vectors, namespace=filename)
+
         return {"status": "document ingested", "chunks": len(chunks)}

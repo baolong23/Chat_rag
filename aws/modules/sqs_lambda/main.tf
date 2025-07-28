@@ -20,6 +20,8 @@ resource "aws_lambda_function" "sqs_worker" {
   role          = aws_iam_role.lambda_exec.arn
   package_type  = "Image"
   image_uri     = "${var.ecr_url}:${var.image_tag}"
+  memory_size   = 1024
+
   environment {
     variables = {
       SQS_QUEUE_URL = var.sqs_id
