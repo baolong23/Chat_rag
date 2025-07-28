@@ -6,6 +6,8 @@ import os
 from typing import Optional
 import boto3
 
+from langchain_google_genai import GoogleGenerativeAIEmbeddings,ChatGoogleGenerativeAI
+
 router = APIRouter()
 
 class QueryRequest(BaseModel):
@@ -24,6 +26,7 @@ def get_pipeline():
     if not pinecone_api_key:
         raise HTTPException(status_code=500, detail="Pinecone configuration missing")
     return RAGPipeline(pinecone_api_key)
+google_apikey = os.environ.get("GOOGLE_API_KEY")
 
 @router.get("/")
 async def start():
@@ -41,7 +44,9 @@ async def ingest(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="No filename provided")
     try:
         s3 = boto3.client('s3')
+        print(s3)
         s3_key = f"uploads/{file.filename}"
+        print(s3_key)
         s3.upload_fileobj(file.file, bucket_name, s3_key)
         # Send SQS message for worker to process
         if not sqs_queue_url:
@@ -63,6 +68,12 @@ async def query(request: QueryRequest, pipeline: RAGPipeline = Depends(get_pipel
     """
     Answer a user question using RAG pipeline.
     """
-    if not request.query:
-        raise HTTPException(status_code=400, detail="Query string required")
-    return pipeline.answer_query(request.query, request.top_k or 3)
+    try:
+        embedder = GoogleGenerativeAIEmbeddings( model="models/embedding-001", google_api_key=google_apikey )
+        llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", api_key=google_apikey)
+        if not request.query:
+            raise HTTPException(status_code=400, detail="Query string required")
+        return pipeline.answer_query(embedder,llm,request.query, request.top_k or 3)
+    except Exception as e:
+        print(f"[ERROR] Query failed: {e}")
+        raise HTTPException(status_code=500, detail=f"{str(e)}")

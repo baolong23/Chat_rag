@@ -15,7 +15,7 @@ cd "$PROJECT_ROOT"
 # Build Docker image
 aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $(aws sts get-caller-identity --query Account --output text).dkr.ecr.$AWS_REGION.amazonaws.com
 ECR_URI=$(aws ecr describe-repositories --repository-names $ECR_REPO --region $AWS_REGION --query "repositories[0].repositoryUri" --output text)
-docker build --no-cache -t $ECR_REPO:$IMAGE_TAG .
+docker build  --platform linux/amd64 --provenance=false -t $ECR_REPO:$IMAGE_TAG .
 docker tag $ECR_REPO:$IMAGE_TAG $ECR_URI:$IMAGE_TAG
 
 docker push $ECR_URI:$IMAGE_TAG

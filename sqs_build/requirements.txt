@@ -1,0 +1,16 @@
+
+boto3
+pinecone
+langchain
+fastapi
+mangum
+PyPDF2
+pytesseract
+Pillow
+pandas
+langchain-google-genai
+langchain-community
+# uvicorn[standard]
+python-multipart
+numpy>=1.22,<2.1
+  

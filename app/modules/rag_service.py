@@ -21,9 +21,11 @@ class RAGService:
         """
         self.pinecone = Pinecone(api_key=pinecone_api_key)
         self.index = self.pinecone.Index(index_name)
-        self.embedder = GoogleGenerativeAIEmbeddings(model_name = "models/embedding-001")
-        self.llm = ChatGoogleGenerativeAI(api_key = google_apikey)
+        self.embedder = None
+        self.llm = None
         self.text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+
+        
 
     def process_document_from_s3(self, bucket: str, key: str, filename: str) -> dict:
         """
@@ -57,13 +59,13 @@ class RAGService:
         self.index.upsert(vectors)
         return {"status": "document ingested", "chunks": len(chunks)}
 
-    def answer_query(self, query: str, top_k: int = 3) -> dict:
+    def answer_query(self,embedder, llm, query: str, top_k: int = 3) -> dict:
         """
         Answer user query using indexed document context and LLM.
         """
-        query_embedding = self.embedder.embed_query(query)
+        query_embedding = embedder.embed_query(query)
         results = self.index.query(vector=query_embedding, top_k=top_k, include_metadata=True)
         context = "\n".join([match["metadata"]["text"] for match in results["matches"]])
         prompt = f"Context:\n{context}\n\nQuestion: {query}\nAnswer:"
-        answer = self.llm(prompt)
+        answer = llm.invoke(prompt)
         return {"answer": answer, "context": context}

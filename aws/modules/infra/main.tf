@@ -8,6 +8,7 @@ provider "aws" {
 # SQS queue for document processing
 resource "aws_sqs_queue" "rag_queue" {
   name = var.sqs_queue_name
+  visibility_timeout_seconds = 120
 }
 
 resource "random_id" "bucket_id" {
@@ -24,8 +25,6 @@ resource "aws_s3_bucket" "documents" {
 }
 
 
-
-
 resource "aws_ecr_repository" "lambda_ecr"{
   name = "rag-lambda"
   image_tag_mutability = "MUTABLE"
@@ -34,6 +33,14 @@ resource "aws_ecr_repository" "lambda_ecr"{
   }
 }
 
+
+resource "aws_ecr_repository" "lambda_ecr_sqs"{
+  name = "sqs-worker-lambda"
+  image_tag_mutability = "MUTABLE"
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+}
 
 
 
@@ -81,6 +88,10 @@ output "sqs_rag_id" {
 
 output "ecr_url" {
   value = aws_ecr_repository.lambda_ecr.repository_url
+}
+
+output "ecr_sqs_url" {
+  value = aws_ecr_repository.lambda_ecr_sqs.repository_url
 }
 
 # output "apigw_execution_arn" {

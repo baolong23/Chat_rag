@@ -10,7 +10,11 @@ module "lambda" {
   sqs_rag_id          = module.infra.sqs_rag_id
   s3_arn              = module.infra.s3_arn
 }
-#   apigw_execution_arn = module.infra.apigw_execution_arn
-#   apigw_id            = module.infra.apigw_id
-#   apigw_resource_id   = module.infra.apigw_resource_id
-#   apigw_method_http   = module.infra.apigw_method_http
+# Thêm module sqs_lambda cho worker SQS
+module "sqs_lambda" {
+  source      = "./modules/sqs_lambda"
+  # sqs_arn     = module.infra.sqs_arn
+  # sqs_id      = module.infra.sqs_rag_id
+  # ecr_url     = module.infra.ecr_sqs_url
+  # bucket_name = module.infra.bucket_name
+}

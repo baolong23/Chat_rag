@@ -18,8 +18,8 @@ class RAGPipeline:
         """
         return self.rag_service.ingest_document(file)
 
-    def answer_query(self, query: str, top_k: int = 3) -> dict:
+    def answer_query(self, embedder, llm, query: str, top_k: int = 3) -> dict:
         """
         Answer query using RAGService.
         """
-        return self.rag_service.answer_query(query, top_k)
+        return self.rag_service.answer_query(embedder,llm,query, top_k)
