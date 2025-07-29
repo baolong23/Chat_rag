@@ -117,16 +117,6 @@ resource "aws_api_gateway_stage" "rag_api_stage" {
 }
 
 
-# resource "aws_api_gateway_deployment" "rag_api_deploy" {
-#   depends_on = [
-#     "aws_api_gateway_integration.lambda",
-#     "aws_api_gateway_integration.lambda_root",
-#   ]
-
-#   rest_api_id = "${aws_api_gateway_rest_api.rag_api.id}"
-#   stage_name  = "test"
-# }
-
 
 # IAM policy for Lambda to access S3 and CloudWatch Logs
 resource "aws_iam_role_policy" "lambda_policy" {

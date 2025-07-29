@@ -51,9 +51,7 @@ async def ingest(file: UploadFile = File(...)):
         s3 = boto3.client('s3')
         s3_key = f"uploads/{file.filename}"
       
-        # ✅ QUAN TRỌNG: Đọc file theo chunks để tránh memory issues trong Lambda
-     
-        content = await file.read()  # Chỉ đọc 1 lần
+        content = await file.read()  
 
         s3.upload_fileobj(
             BytesIO(content),

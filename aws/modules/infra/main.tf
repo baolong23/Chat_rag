@@ -44,21 +44,6 @@ resource "aws_ecr_repository" "lambda_ecr_sqs"{
 
 
 
-# S3 triggers Lambda on document upload
-# resource "aws_s3_bucket_notification" "notify_rag_service" {
-#   bucket = aws_s3_bucket.documents.id
-#   lambda_function {
-#     lambda_function_arn = aws_lambda_function.rag_service.arn
-#     events              = ["s3:ObjectCreated:*"]
-#     filter_prefix       = "uploads/"
-#   }
-#   depends_on = [aws_lambda_function.rag_service]
-# }
-
-
-
-
-
 output "sqs_queue_url" {
   description = "SQS queue URL for document processing"
   value       = aws_sqs_queue.rag_queue.id

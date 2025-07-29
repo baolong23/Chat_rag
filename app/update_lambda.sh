@@ -20,3 +20,7 @@ docker tag $ECR_REPO:$IMAGE_TAG $ECR_URI:$IMAGE_TAG
 
 docker push $ECR_URI:$IMAGE_TAG
 
+# Update Lambda to use new image
+aws lambda update-function-code --function-name $LAMBDA_NAME --image-uri $ECR_URI:$IMAGE_TAG --region $AWS_REGION
+
+echo "ECR-based Lambda deployment complete."
