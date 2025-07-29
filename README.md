@@ -82,7 +82,7 @@ Update lambda nếu đã tạo
 bash update_lambda_worker.sh
 ```
 
-### 5. Triển khai hạ tầng cho Lambda Container image và API Gateway cho SQS Worker
+### 5. Triển khai hạ tầng cho Lambda Container image cho SQS Worker
 ```sh
 - `PINECONE_API_KEY`, `PINECONE_ENV`, `PINECONE_INDEX`
 - `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`
