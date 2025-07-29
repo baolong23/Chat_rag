@@ -96,6 +96,3 @@ terraform apply -target = module.sqs_lambda
 ## Sơ đồ hệ thống
 ![Sơ đồ kiến trúc hệ thống](./architect.png)
 
-## Đóng góp
-- Fork, tạo branch, PR.
-- Đảm bảo code tuân thủ PEP8 và có test.
